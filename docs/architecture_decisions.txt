@@ -1,0 +1,19 @@
+The challenge with this project is to be able to scale the application to ingest a large number of locations. 
+
+The main limitation with the current design is that connections are computed on the fly as part of "/persons/{id}/connections" endpoint. 
+
+This logic runs in quadratic time and will not scale properly in production, given the expected large number of locations to be ingested. 
+
+To address this issue, this solution proposes to pre-compute connections as new locations get added, using GRPC along with kafka to achieve better performance.
+
+GRPC is used for low latency in api communication. Using GRPC along with Kafka will help to more easily ingest the large number of locations expected in production. In addition, GRPC will allow for better battery consumption on mobile devices.
+
+Kafka is used to offload the heavvy connections computation to a separate process so that location service can respond immediately.
+
+The locations Kafka Consumer computes and persists connections as new locations get added, to allow query for connections to execute faster and scale properly. This consumer will execute the following steps:
+
+1. Create new location in location table
+2. Compute connections by finding other locations in close proximity
+3. Create new connections in a new connections table 
+
+With connections pre-computed and saved to a separate table, the existing "/persons/{id}/connections" will only need to query this table to perform its function. 
