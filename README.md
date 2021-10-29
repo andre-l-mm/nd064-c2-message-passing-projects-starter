@@ -141,6 +141,7 @@ To manually connect to the database, you will need software compatible with Post
 * CLI users will find [psql](http://postgresguide.com/utilities/psql.html) to be the industry standard.
 * GUI users will find [pgAdmin](https://www.pgadmin.org/) to be a popular open-source solution.
 
+
 ## Architecture Diagrams
 Your architecture diagram should focus on the services and how they talk to one another. For our project, we want the diagram in a `.png` format. Some popular free software and tools to create architecture diagrams:
 1. [Lucidchart](https://www.lucidchart.com/pages/)
@@ -150,3 +151,61 @@ Your architecture diagram should focus on the services and how they talk to one 
 ## Tips
 * We can access a running Docker container using `kubectl exec -it <pod_id> sh`. From there, we can `curl` an endpoint to debug network issues.
 * The starter project uses Python Flask. Flask doesn't work well with `asyncio` out-of-the-box. Consider using `multiprocessing` to create threads for asynchronous behavior in a standard Flask application.
+
+## Local Development Instructions
+
+### Installing psql
+
+```
+# MacOS Install and add folder to path in your bash profile configuration
+brew install libpq
+echo 'export PATH="/usr/local/opt/libpq/bin:$PATH"' >> /Users/andremagalhaes/.bash_profile
+```
+
+### Connecting with psql
+```
+# Keep port-forward running in a separate terminal to allow for connections on localhost:5432
+kubectl port-forward svc/postgres 5432:5432
+
+# Connect with psql
+psql -h localhost -p 5432 -U ct_admin geoconnections
+```
+
+### Running apis locally
+
+```
+# Create virtual environment
+python3 -m venv .venv
+
+# Activate virtual environment (always run this when openning a new terminal)
+cd .venv
+source bin/activate
+
+# Upgrade pip
+pip install --upgrade pip
+
+# Geos package required by some of the python packages
+brew install geos
+
+# Go to api folder
+cd modules/api
+
+# Install required packages - Exporting LDFLAGS required to install psycopg2
+env LDFLAGS="-I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib" pip install -r requirements.txt
+
+# Make sure database is accessible on localhost by running this command on a separate terminal
+kubectl port-forward svc/postgres 5432:5432
+
+# Create .env file with the following settings
+DB_USERNAME=ct_admin
+DB_NAME=geoconnections
+DB_HOST=localhost
+DB_PORT=5432
+DB_PASSWORD=wowimsosecure
+
+# Using flask command line to start the application
+# This can be used to automatically apply source code changes but runs on port 5000
+FLASK_ENV=dev flask run
+
+# Go to http://127.0.0.1:5000/api/
+```
