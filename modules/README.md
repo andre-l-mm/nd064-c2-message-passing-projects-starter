@@ -51,6 +51,12 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_PASSWORD=wowimsosecure
 
+# Run Kafka locally
+docker-compose --file docker-kafka-compose.yaml up -d
+
+# Provision locations Kafka Topic
+bin/kafka-topics.sh --create --topic locations --partitions 1 --replication-factor 1 --bootstrap-server localhost:9092
+
 # Using flask command line to start the application
 # This can be used to automatically apply source code changes but runs on port 5000
 FLASK_ENV=dev flask run
@@ -103,6 +109,13 @@ docker push andremagalhaes/udaconnect-app
 kubectl apply -f deployment/db-configmap.yaml
 kubectl apply -f deployment/db-secret.yaml
 kubectl apply -f deployment/postgres.yaml
+kubectl apply -f deployment/kafka.yaml
+
+# Wait Kafka pods to start pods before proceeding 
+kubectl wait pod --timeout 300s --for=condition=Ready -l app.kubernetes.io/name=kafka
+
+# Create locations topic in the kubernetes broker
+kubectl exec -it kafka-0 -- kafka-topics.sh --create --bootstrap-server kafka-headless:9092 --replication-factor 1 --partitions 1 --topic locations
 
 # Apis
 kubectl apply -f deployment/udaconnect-locations-api.yaml
@@ -131,4 +144,29 @@ kubectl rollout restart deploy [DEPLOYMENT_NAME]
 
 # Get pod logs in case of errors
 kubectl logs [POD_NAME]
+
+# Consuming Kafka topic
+kubectl exec -it kafka-0 -- kafka-console-consumer.sh --bootstrap-server kafka-headless:9092 --topic locations --from-beginning
+
+# Producing to Kafka topic
+kubectl exec -it kafka-0 -- kafka-console-producer.sh --broker-list kafka-headless:9092 --topic mytopic
+```
+
+### Creating kafka manifest
+
+Kafka manifest file was created using helm. This is only for future reference as the file (kafka.yaml) was already committed to git:
+
+```
+# Install Helm
+brew install helm
+
+# Add and update bitnami repo
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo update
+
+# Generate Kafka manifest
+helm template kafka bitnami/kafka \
+     --set volumePermissions.enabled=true \
+     --set zookeeper.volumePermissions.enabled=true \
+     > kafka.yaml
 ```

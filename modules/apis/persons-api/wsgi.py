@@ -7,8 +7,6 @@ if os.getenv("FLASK_ENV") == "dev":
     from dotenv import load_dotenv
     load_dotenv()
 
-sys.path.append("..")
-
 app = create_app(os.getenv("FLASK_ENV") or "test")
 if __name__ == "__main__":
     app.run(debug=True)

@@ -1,10 +1,14 @@
+import os
 from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_restx import Api
 from flask_sqlalchemy import SQLAlchemy
+from kafka import KafkaProducer
 
 db = SQLAlchemy()
 
+KAFKA_SERVER = f'{os.environ["KAFKA_SERVICE_HOST"]}:{os.environ["KAFKA_SERVICE_PORT"]}'
+kafka_producer = KafkaProducer(bootstrap_servers=KAFKA_SERVER)
 
 def create_app(env=None):
     from app.config import config_by_name
