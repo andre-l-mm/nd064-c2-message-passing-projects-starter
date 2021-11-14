@@ -26,3 +26,4 @@ Werkzeug==0.16.1
 flask-restx==0.2.0
 python-dotenv==0.19.1
 requests==2.26.0
+kafka_python==2.0.2

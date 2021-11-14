@@ -1,69 +1,5 @@
 # UdaConnect Apis
 
-## Local Development Instructions
-
-### Installing psql
-
-```
-# MacOS Install and add folder to path in your bash profile configuration
-brew install libpq
-echo 'export PATH="/usr/local/opt/libpq/bin:$PATH"' >> /Users/andremagalhaes/.bash_profile
-```
-
-### Connecting with psql
-```
-# Keep port-forward running in a separate terminal to allow for connections on localhost:5432
-kubectl port-forward svc/postgres 5432:5432
-
-# Connect with psql
-psql -h localhost -p 5432 -U ct_admin geoconnections
-```
-
-### Running apis locally
-
-```
-# Create virtual environment
-python3 -m venv .venv
-
-# Activate virtual environment (always run this when openning a new terminal)
-cd .venv
-source bin/activate
-
-# Upgrade pip
-pip install --upgrade pip
-
-# Geos package required by some of the python packages
-brew install geos
-
-# Go to api folder
-cd modules/api
-
-# Install required packages - Exporting LDFLAGS required to install psycopg2
-env LDFLAGS="-I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib" pip install -r requirements.txt
-
-# Make sure database is accessible on localhost by running this command on a separate terminal
-kubectl port-forward svc/postgres 5432:5432
-
-# Create .env file with the following settings
-DB_USERNAME=ct_admin
-DB_NAME=geoconnections
-DB_HOST=localhost
-DB_PORT=5432
-DB_PASSWORD=wowimsosecure
-
-# Run Kafka locally
-docker-compose --file docker-kafka-compose.yaml up -d
-
-# Provision locations Kafka Topic
-bin/kafka-topics.sh --create --topic locations --partitions 1 --replication-factor 1 --bootstrap-server localhost:9092
-
-# Using flask command line to start the application
-# This can be used to automatically apply source code changes but runs on port 5000
-FLASK_ENV=dev flask run
-
-# Go to http://127.0.0.1:5000/api/
-```
-
 ## Building 
 
 ### Build Docker Images
@@ -169,4 +105,68 @@ helm template kafka bitnami/kafka \
      --set volumePermissions.enabled=true \
      --set zookeeper.volumePermissions.enabled=true \
      > kafka.yaml
+```
+
+## Local Development Instructions
+
+### Installing psql
+
+```
+# MacOS Install and add folder to path in your bash profile configuration
+brew install libpq
+echo 'export PATH="/usr/local/opt/libpq/bin:$PATH"' >> /Users/andremagalhaes/.bash_profile
+```
+
+### Connecting with psql
+```
+# Keep port-forward running in a separate terminal to allow for connections on localhost:5432
+kubectl port-forward svc/postgres 5432:5432
+
+# Connect with psql
+psql -h localhost -p 5432 -U ct_admin geoconnections
+```
+
+### Running apis locally
+
+```
+# Create virtual environment
+python3 -m venv .venv
+
+# Activate virtual environment (always run this when openning a new terminal)
+cd .venv
+source bin/activate
+
+# Upgrade pip
+pip install --upgrade pip
+
+# Geos package required by some of the python packages
+brew install geos
+
+# Go to api folder
+cd modules/api
+
+# Install required packages - Exporting LDFLAGS required to install psycopg2
+env LDFLAGS="-I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib" pip install -r requirements.txt
+
+# Make sure database is accessible on localhost by running this command on a separate terminal
+kubectl port-forward svc/postgres 5432:5432
+
+# Create .env file with the following settings
+DB_USERNAME=ct_admin
+DB_NAME=geoconnections
+DB_HOST=localhost
+DB_PORT=5432
+DB_PASSWORD=wowimsosecure
+
+# Run Kafka locally
+docker-compose --file modules/docker-kafka-compose.yaml up -d
+
+# Provision locations Kafka Topic
+bin/kafka-topics.sh --create --topic locations --partitions 1 --replication-factor 1 --bootstrap-server localhost:9092
+
+# Using flask command line to start the application
+# This can be used to automatically apply source code changes but runs on port 5000
+FLASK_ENV=dev flask run
+
+# Go to http://127.0.0.1:5000/api/
 ```

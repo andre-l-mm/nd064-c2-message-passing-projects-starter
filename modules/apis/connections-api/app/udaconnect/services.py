@@ -1,8 +1,9 @@
+import os
 import logging
 from datetime import datetime, timedelta
 from typing import Dict, List
-
 from app import db
+from kafka import KafkaConsumer
 from app.udaconnect.models import Connection, Location, Person
 from app.udaconnect.schemas import LocationSchema
 from geoalchemy2.functions import ST_Point
@@ -12,11 +13,20 @@ from .api_clients import PersonsApi
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger("udaconnect-api")
 
-
 class ConnectionService:
     @staticmethod
-    def find_contacts(person_id: int, start_date: datetime, end_date: datetime, meters=5
-    ) -> List[Connection]:
+    def start_locations_consumer():
+        LOCATIONS_TOPIC = 'locations'
+        KAFKA_SERVER = f'{os.environ["KAFKA_SERVICE_HOST"]}:{os.environ["KAFKA_SERVICE_PORT"]}'
+        kafka_consumer = KafkaConsumer(LOCATIONS_TOPIC, bootstrap_servers=KAFKA_SERVER, group_id='connections_api')
+
+        logging.warning('Kafka locations topic consumer started')
+
+        for location in kafka_consumer:
+            logging.error(location)
+
+    @staticmethod
+    def find_contacts(person_id: int, start_date: datetime, end_date: datetime, meters=5) -> List[Connection]:
         """
         Finds all Person who have been within a given distance of a given Person within a date range.
 
