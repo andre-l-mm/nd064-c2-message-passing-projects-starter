@@ -8,12 +8,11 @@ To address this issue, this solution proposes to pre-compute connections as new 
 
 GRPC is used for low latency in api communication. Using GRPC along with Kafka will help to more easily ingest the large number of locations expected in production. In addition, GRPC will allow for better battery consumption on mobile devices.
 
-Kafka is used to offload the heavvy connections computation to a separate process so that location service can respond immediately.
+Kafka is used to offload the heavy connections computation to a separate process so that location service can continue to respond immediately when adding new locations.
 
-The locations Kafka Consumer computes and persists connections as new locations get added, to allow query for connections to execute faster and scale properly. This consumer will execute the following steps:
+The locations topic Kafka Consumer computes and persists connections as new locations get added, to allow query for connections to execute faster and scale properly. This consumer will execute the following steps:
 
-1. Create new location in location table
-2. Compute connections by finding other locations in close proximity
-3. Create new connections in a new connections table 
+1. Compute connections by finding other locations in close proximity
+2. Create new connections in a new connections table
 
-With connections pre-computed and saved to a separate table, the existing "/persons/{id}/connections" will only need to query this table to perform its function. 
+With connections pre-computed and saved to a separate table, connections api will only need to query this table to perform its function.
