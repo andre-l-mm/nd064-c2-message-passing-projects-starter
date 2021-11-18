@@ -5,8 +5,9 @@ from app import db  # noqa
 from geoalchemy2 import Geometry
 from geoalchemy2.shape import to_shape
 from shapely.geometry.point import Point
-from sqlalchemy import BigInteger, Column, Date, DateTime, ForeignKey, Integer, String
+from sqlalchemy import BigInteger, Float, Table, Column, Date, DateTime, ForeignKey, Integer, String
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.orm import relationship
 
 
 class Person(db.Model):
@@ -54,8 +55,20 @@ class Location(db.Model):
         coord_text = self.wkt_shape
         return coord_text[coord_text.find("(") + 1 : coord_text.find(" ")]
 
+class Connection(db.Model):
+    __tablename__ = "connection"
+
+    person_id = Column(BigInteger, ForeignKey(Person.id), primary_key=True)
+    location_id = Column(BigInteger, ForeignKey(Location.id), primary_key=True)
+    connection_time = Column(DateTime, nullable=False)
+    distance = Column(Float, nullable=False)
+    creation_time = Column(DateTime, nullable=False, default=datetime.utcnow)
+    update_time = Column(DateTime)
+
+    person = relationship(Person, foreign_keys=[person_id], lazy="joined")
+    location = relationship(Location, foreign_keys=[location_id], lazy="joined")
 
 @dataclass
-class Connection:
-    location: Location
+class Contact:
     person: Person
+    location: Location

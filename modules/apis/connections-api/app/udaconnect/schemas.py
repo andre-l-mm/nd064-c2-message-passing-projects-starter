@@ -24,5 +24,16 @@ class PersonSchema(Schema):
 
 
 class ConnectionSchema(Schema):
+    person_id = fields.Integer()
+    location_id = fields.Integer()
+    connection_time = fields.DateTime()
+    distance = fields.Float()
+    creation_time = fields.DateTime()
+    update_time = fields.DateTime()
+
+    class Meta:
+        model = Connection
+
+class ContactSchema(Schema):
     location = fields.Nested(LocationSchema)
     person = fields.Nested(PersonSchema)

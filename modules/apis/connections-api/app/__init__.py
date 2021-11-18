@@ -9,6 +9,7 @@ db = SQLAlchemy()
 def create_app(env=None):
     from app.config import config_by_name
     from app.routes import register_routes
+    from app.database import create_tables
 
     app = Flask(__name__)
     app.config.from_object(config_by_name[env or "test"])
@@ -18,6 +19,9 @@ def create_app(env=None):
 
     register_routes(api, app)
     db.init_app(app)
+
+    # Automatically create database tables.
+    create_tables(app, db)
 
     @app.route("/health")
     def health():
