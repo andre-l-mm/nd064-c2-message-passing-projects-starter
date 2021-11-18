@@ -149,7 +149,12 @@ cd modules/api
 env LDFLAGS="-I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib" pip install -r requirements.txt
 
 # Make sure database is accessible on localhost by running this command on a separate terminal
-kubectl port-forward svc/postgres 5432:5432
+# Running command in bacground mode
+kubectl port-forward svc/postgres 5432:5432 &
+
+# Similarly, makes kafka accessible on localhost
+# Running command in bacground mode  
+kubectl port-forward svc/kafka 9092:9092 & 
 
 # Create .env file with the following settings
 DB_USERNAME=ct_admin
