@@ -1,0 +1,154 @@
+{
+	"info": {
+		"_postman_id": "d1f4d863-cea7-4e26-b15b-1b5755ce6d61",
+		"name": "Cloud Native -Udaconnect",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Locations API",
+			"item": [
+				{
+					"name": "Creates new location",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"person_id\": 9,\n    \"creation_time\": \"2020-07-07T12:40:06\",\n    \"latitude\": \"-122.290883\",\n    \"longitude\": \"37.55363\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:30002/api/locations",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "30002",
+							"path": [
+								"api",
+								"locations"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Connections API",
+			"item": [
+				{
+					"name": "Query Connections",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:30004/api/connections?person_id=9&start_date=2020-01-01&end_date=2020-12-30&distance=5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "30004",
+							"path": [
+								"api",
+								"connections"
+							],
+							"query": [
+								{
+									"key": "person_id",
+									"value": "9"
+								},
+								{
+									"key": "start_date",
+									"value": "2020-01-01"
+								},
+								{
+									"key": "end_date",
+									"value": "2020-12-30"
+								},
+								{
+									"key": "distance",
+									"value": "5"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Persons API",
+			"item": [
+				{
+					"name": "Query All Persons",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:30003/api/persons",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "30003",
+							"path": [
+								"api",
+								"persons"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Query person by id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:30003/api/persons/9",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "30003",
+							"path": [
+								"api",
+								"persons",
+								"9"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
