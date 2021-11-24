@@ -9,6 +9,10 @@
 cd modules/apis/locations-api
 docker build -f ./Dockerfile -t udaconnect-locations-api .
 
+# Location GRPC api
+cd modules/apis/locations-grpc
+docker build -f ./Dockerfile -t udaconnect-locations-grpc .
+
 # Person api
 cd modules/apis/persons-api
 docker build -f ./Dockerfile -t udaconnect-persons-api .
@@ -27,6 +31,9 @@ docker build -f ./Dockerfile -t udaconnect-app .
 ```
 docker tag udaconnect-locations-api andremagalhaes/udaconnect-locations-api
 docker push andremagalhaes/udaconnect-locations-api
+
+docker tag udaconnect-locations-grpc andremagalhaes/udaconnect-locations-grpc
+docker push andremagalhaes/udaconnect-locations-grpc
 
 docker tag udaconnect-persons-api andremagalhaes/udaconnect-persons-api
 docker push andremagalhaes/udaconnect-persons-api
@@ -55,6 +62,7 @@ kubectl exec -it kafka-0 -- kafka-topics.sh --create --bootstrap-server kafka-he
 
 # Apis
 kubectl apply -f deployment/udaconnect-locations-api.yaml
+kubectl apply -f deployment/udaconnect-locations-grpc.yaml
 kubectl apply -f deployment/udaconnect-persons-api.yaml
 kubectl apply -f deployment/udaconnect-connections-api.yaml
 
@@ -71,6 +79,10 @@ kubectl apply -f deployment/udaconnect-app.yaml
 * `http://localhost:30004/` - Connections API - OpenAPI Documentation
 * `http://localhost:30004/api/` - Connections API - Base path for API 
 * `http://localhost:30000/` - Frontend ReactJS Application
+
+**Locations GRPC**
+
+Check script `create_test_locations.py`. It connects to locations GRPC server on exposed node port `30005` and creates a new location. 
 
 ### Kubectl Others
 
@@ -156,22 +168,50 @@ kubectl port-forward svc/postgres 5432:5432 &
 # Running command in bacground mode  
 kubectl port-forward svc/kafka 9092:9092 & 
 
-# Create .env file with the following settings
+# Provision locations Kafka Topic
+bin/kafka-topics.sh --create --topic locations --partitions 1 --replication-factor 1 --bootstrap-server localhost:9092
+
+# Create .env file with the following settings (a separate file must exist for each microservice)
 DB_USERNAME=ct_admin
 DB_NAME=geoconnections
 DB_HOST=localhost
 DB_PORT=5432
 DB_PASSWORD=wowimsosecure
-
-# Run Kafka locally
-docker-compose --file modules/docker-kafka-compose.yaml up -d
-
-# Provision locations Kafka Topic
-bin/kafka-topics.sh --create --topic locations --partitions 1 --replication-factor 1 --bootstrap-server localhost:9092
+KAFKA_SERVICE_HOST=localhost #Required for locations-api, connections-api and locations-grpc
+KAFKA_SERVICE_PORT=9092
 
 # Using flask command line to start the application
 # This can be used to automatically apply source code changes but runs on port 5000
 FLASK_ENV=dev flask run
 
 # Go to http://127.0.0.1:5000/api/
+```
+
+### Running locations GRPC api locally
+
+```
+cd modules/locations-grpc
+ENV=dev python main.py
+```
+
+## Creating a sample location using GRPC api
+
+```
+cd modules/locations-grpc
+python create_test_locations.py
+```
+
+### Run Kafka locally
+
+Steps above use the kafka instance running in kubernetes through port forward. Alternatively, you can use a local instance:
+
+```
+docker-compose --file modules/docker-kafka-compose.yaml up -d
+```
+
+### Generating proto files
+
+```
+cd proto
+python -m grpc_tools.protoc -I./ --python_out=./ --grpc_python_out=./ location.proto
 ```

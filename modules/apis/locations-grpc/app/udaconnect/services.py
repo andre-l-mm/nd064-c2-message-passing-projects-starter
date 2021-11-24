@@ -5,8 +5,7 @@ from app.udaconnect.models import Location
 from app.udaconnect.schemas import LocationSchema
 from geoalchemy2.functions import ST_Point
 
-logging.basicConfig(level=logging.WARNING)
-logger = logging.getLogger("udaconnect-api")
+logger = logging.getLogger('locations-grpc')
 
 TOPIC_NAME = 'locations'
 
@@ -32,5 +31,7 @@ class LocationService:
         location_schema = LocationSchema()
         kafka_producer.send(TOPIC_NAME, location_schema.dumps(new_location).encode('utf-8'))
         kafka_producer.flush()
+
+        logger.info('Created new location and sent it to locations topic')
 
         return new_location

@@ -1,6 +1,10 @@
 import os
 import sys
 import time
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger('locations-grpc')
 
 if os.getenv("ENV") == "dev":
     from dotenv import load_dotenv
@@ -13,7 +17,7 @@ from app import create_server
 server = create_server(location_pb2, location_pb2_grpc, location_servicer)
 if __name__ == "__main__":
     server.start()
-    print('GRPC server started')
+    logger.info('GRPC server started')
 
 # Keep server alive.
 try:

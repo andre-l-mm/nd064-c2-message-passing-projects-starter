@@ -9,7 +9,7 @@ Sample implementation of a writer that creates new locations using grpc.
 
 print("Sending sample locations using grpc")
 
-channel = grpc.insecure_channel("localhost:5000")
+channel = grpc.insecure_channel("localhost:30005")
 stub = location_pb2_grpc.LocationServiceStub(channel)
 
 # Update this with desired payload

@@ -1,0 +1,9 @@
+GRPC Locations API instructions:
+
+1. A test script is provided which creates a sample location using the grpc endpoint. Run the following to create a single location and derive new connections:
+
+python create_test_location.py
+
+2. The GRPC api requires the same fields as the REST version (POST /locations). Also provided sample for that in the Postman scripts.
+
+3. The REST api is only provided as additional option to create locations but as per design, the goal would be to use the GRPC version for better performance.

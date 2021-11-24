@@ -19,3 +19,4 @@ Werkzeug==0.16.1
 python-dotenv==0.19.1
 kafka_python==2.0.2
 grpcio==1.42.0
+protobuf==3.19.1

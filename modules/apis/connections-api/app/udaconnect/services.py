@@ -10,7 +10,7 @@ from geoalchemy2.functions import ST_Point
 from sqlalchemy.sql import text, update
 from .api_clients import PersonsApi
 
-logging.basicConfig(level=logging.WARNING)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("udaconnect-api")
 
 
@@ -22,7 +22,7 @@ class ConnectionService:
             KAFKA_SERVER = f'{os.environ["KAFKA_SERVICE_HOST"]}:{os.environ["KAFKA_SERVICE_PORT"]}'
             kafka_consumer = KafkaConsumer(LOCATIONS_TOPIC, bootstrap_servers=KAFKA_SERVER, group_id='connections_api')
 
-            logging.warning('Kafka locations topic consumer started')
+            logger.info('Kafka locations topic consumer started')
 
             query = text(
                 """
@@ -38,6 +38,7 @@ class ConnectionService:
 
             location_schema = LocationSchema()
             for record in kafka_consumer:
+                logger.info('New location received from kafka topic')
                 location = location_schema.loads(record.value.decode('utf-8'))
 
                 params = {
@@ -76,6 +77,7 @@ class ConnectionService:
                 # Commit one time after all connections added.
                 db.session.commit()
 
+                logger.info('Completed computing and adding connections for new location')
 
     @staticmethod
     def add_or_update(db, connection):
