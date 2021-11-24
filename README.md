@@ -1,4 +1,58 @@
 # UdaConnect
+
+## Instructions for Evaluator
+
+### Running the final solution
+
+**Deploy to Kubernetes** 
+```
+# Configuration
+kubectl apply -f deployment/db-configmap.yaml
+kubectl apply -f deployment/db-secret.yaml
+kubectl apply -f deployment/postgres.yaml
+kubectl apply -f deployment/kafka.yaml
+
+# Wait Kafka pods to start pods before proceeding 
+kubectl wait pod --timeout 300s --for=condition=Ready -l app.kubernetes.io/name=kafka
+
+# Create locations topic in the kubernetes broker
+kubectl exec -it kafka-0 -- kafka-topics.sh --create --bootstrap-server kafka-headless:9092 --replication-factor 1 --partitions 1 --topic locations
+
+# Apis
+kubectl apply -f deployment/udaconnect-locations-api.yaml
+kubectl apply -f deployment/udaconnect-locations-grpc.yaml
+kubectl apply -f deployment/udaconnect-persons-api.yaml
+kubectl apply -f deployment/udaconnect-connections-api.yaml
+
+# Web Application
+kubectl apply -f deployment/udaconnect-app.yaml
+```
+
+**Verifying it works**
+
+* `http://localhost:30002/` - Locations API - OpenAPI Documentation
+* `http://localhost:30002/api/` - Locations API - Base path for API
+* `http://localhost:30003/` - Persons API - OpenAPI Documentation
+* `http://localhost:30003/api/` - Persons API - Base path for API
+* `http://localhost:30004/` - Connections API - OpenAPI Documentation
+* `http://localhost:30004/api/` - Connections API - Base path for API 
+* `http://localhost:30000/` - Frontend ReactJS Application
+
+**Locations GRPC**
+
+Run script `create_test_locations.py`. It connects to locations GRPC server on exposed node port `30005` and creates a new location.
+
+```
+cd cd modules/apis/locations-grpc
+python create_test_locations.py
+```
+
+**Important Notes**
+
+- Because connections are now derived as locations are added, you will need to first create at least one new location using provided script above before being able to retrieve connections using the connections api.
+- Connections are persisted to connection table. You can verify the process worked by querying this table once a new location is created.
+- Connection table is provisioned automatically at startup of connections api using SQLAlchemy `create_all` method. 
+
 ## Overview
 ### Background
 Conferences and conventions are hotspots for making connections. Professionals in attendance often share the same interests and can make valuable business and personal connections with one another. At the same time, these events draw a large crowd and it's often hard to make these connections in the midst of all of these events' excitement and energy. To help attendees make connections, we are building the infrastructure for a service that can inform attendees if they have attended the same booths and presentations at an event.
