@@ -43,7 +43,7 @@ kubectl apply -f deployment/udaconnect-app.yaml
 Run script `create_test_locations.py`. It connects to locations GRPC server on exposed node port `30005` and creates a new location.
 
 ```
-cd cd modules/apis/locations-grpc
+cd modules/apis/locations-grpc
 python create_test_locations.py
 ```
 
