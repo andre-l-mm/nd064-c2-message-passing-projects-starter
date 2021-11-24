@@ -51,7 +51,9 @@ python create_test_locations.py
 
 - Because connections are now derived as locations are added, you will need to first create at least one new location using provided script above before being able to retrieve connections using the connections api.
 - Connections are persisted to connection table. You can verify the process worked by querying this table once a new location is created.
-- Connection table is provisioned automatically at startup of connections api using SQLAlchemy `create_all` method. 
+- Connection table is provisioned automatically at startup of connections api using SQLAlchemy `create_all` method.
+- Connections are bidirectional. As an example, assuming we have two locations L1 and L2 in proximity and associated with persons P1 and P2 respectively. In this case, person P1 is connected to location L2 while person P2 is connected to location L1. Therefore, when L2 is added, the system computes and adds two connections to the database table. 
+- Connections need to be computed based on the distance between the new location and existing locations. The system computes the distances and stores in the connection table limited to a maximum of 100 m. That means any two locations at more 100 m apart will not be considered. It also means that it only makes sense to search for connections with distance parameter set to a maximum of 100 as we do not save anything above that anyway.
 
 ## Overview
 ### Background
