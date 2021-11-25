@@ -37,47 +37,48 @@ class ConnectionService:
             )
 
             location_schema = LocationSchema()
-            for record in kafka_consumer:
-                logger.info('New location received from kafka topic')
-                location = location_schema.loads(record.value.decode('utf-8'))
+            while True:
+                for record in kafka_consumer:
+                    logger.info('New location received from kafka topic')
+                    location = location_schema.loads(record.value.decode('utf-8'))
 
-                params = {
-                    "person_id": location['person_id'],
-                    "longitude": location['longitude'],
-                    "latitude": location['latitude'],
-                    "meters": 100,
-                    "start_date": location['creation_time'].strftime("%Y-%m-%d"),
-                    "end_date": (location['creation_time'] + timedelta(days=1)).strftime("%Y-%m-%d"),
-                }
+                    params = {
+                        "person_id": location['person_id'],
+                        "longitude": location['longitude'],
+                        "latitude": location['latitude'],
+                        "meters": 100,
+                        "start_date": location['creation_time'].strftime("%Y-%m-%d"),
+                        "end_date": (location['creation_time'] + timedelta(days=1)).strftime("%Y-%m-%d"),
+                    }
 
-                for (
-                        exposed_person_id,
-                        location_id,
-                        creation_time,
-                        exposed_distance,
-                ) in db.engine.execute(query, **params):
-                    direct_connection = Connection(
-                        person_id=location['person_id'],
-                        location_id=location_id,
-                        connection_time=creation_time,
-                        distance=exposed_distance,
-                    )
+                    for (
+                            exposed_person_id,
+                            location_id,
+                            creation_time,
+                            exposed_distance,
+                    ) in db.engine.execute(query, **params):
+                        direct_connection = Connection(
+                            person_id=location['person_id'],
+                            location_id=location_id,
+                            connection_time=creation_time,
+                            distance=exposed_distance,
+                        )
 
-                    opposite_connection = Connection(
-                        person_id=exposed_person_id,
-                        location_id=location['id'],
-                        connection_time=location['creation_time'],
-                        distance=exposed_distance,
-                    )
+                        opposite_connection = Connection(
+                            person_id=exposed_person_id,
+                            location_id=location['id'],
+                            connection_time=location['creation_time'],
+                            distance=exposed_distance,
+                        )
 
-                    # Only add connections if not duplicated and keeps the shortest distance in case it is.
-                    ConnectionService.add_or_update(db, direct_connection)
-                    ConnectionService.add_or_update(db, opposite_connection)
+                        # Only add connections if not duplicated and keeps the shortest distance in case it is.
+                        ConnectionService.add_or_update(db, direct_connection)
+                        ConnectionService.add_or_update(db, opposite_connection)
 
-                # Commit one time after all connections added.
-                db.session.commit()
+                    # Commit one time after all connections added.
+                    db.session.commit()
 
-                logger.info('Completed computing and adding connections for new location')
+                    logger.info('Completed computing and adding connections for new location')
 
     @staticmethod
     def add_or_update(db, connection):
